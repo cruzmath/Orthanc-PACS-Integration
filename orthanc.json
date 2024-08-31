@@ -1,7 +1,7 @@
 {
   "RegisteredUsers": {
-    "matheus": "malia123" #usuário e senha escolhidos 
+    "matheus": "malia123" 
   },
-  "AuthenticationEnabled": true, #habilitando a autenticação e o acesso remoto
+  "AuthenticationEnabled": true, 
   "RemoteAccessAllowed": true
 }
