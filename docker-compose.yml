@@ -1,0 +1,11 @@
+services:
+  orthanc:
+    image: jodogne/orthanc
+    ports:
+      - "8042:8042" # Porta da interface web do Orthanc
+      - "4242:4242" # Porta para comunicação DICOM
+    volumes:
+      - orthanc_db:/var/lib/orthanc/db
+      - ./orthanc.json:/etc/orthanc/orthanc.json:ro # Montar o arquivo de configuração customizado
+volumes:
+  orthanc_db:
