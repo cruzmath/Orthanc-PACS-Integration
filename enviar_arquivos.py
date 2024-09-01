@@ -29,5 +29,10 @@ with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
                                          files={'file': BytesIO(dicom_bytes)},
                                          auth=auth)
                 
-                # Exibir a resposta
-                print(f'Uploaded {file_name}:', response.json())
+                # Verificar o código de status HTTP, a resposta não é um json igual supus na versão anterior
+                if response.status_code == 200:
+                    print(f'Uploaded {file_name}.')
+                    print(f'Response content: {response.text}') # O normal pelo que entendi é retornar nada
+                else:
+                    print(f'Failed to upload {file_name}. HTTP Status Code: {response.status_code}')
+                    print(f'Response content: {response.text}')
