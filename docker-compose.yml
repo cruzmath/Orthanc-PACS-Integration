@@ -7,5 +7,20 @@ services:
     volumes:
       - orthanc_db:/var/lib/orthanc/db
       - ./orthanc.json:/etc/orthanc/orthanc.json:ro # Montar o arquivo de configuração customizado
+    networks:
+      - my-network
+
+  dicom_processor:
+    image: teste_xray_imagem
+    depends_on:
+      - orthanc
+    volumes:
+      - orthanc_db:/var/lib/orthanc/db
+    networks:
+      - my-network
+
+networks:
+  my-network:
+
 volumes:
   orthanc_db:
