@@ -13,8 +13,13 @@
 </ol> 
 
 <h2> ⚠️Problemas encontrados </h2>
-1. Meu desktop pessoal está no limite das configurações necessárias para rodar o Docker, então foi complicado conseguir encontrar a versão que funcionava.
-
+<ol> 
+  <li> A biblioteca Torch não estava sendo lida no meu desktop.</li>
+  <li> Meu desktop pessoal está no limite das configurações necessárias para rodar o Docker, então foi complicado conseguir encontrar a versão que funcionava.</li>
+  <li> O upload dos arquivos ao servidor não estava sendo persistido para outra inicialização.</li>
+  <li> Mesmo tenho conseguido usar o volume para persistir os dados, não estava conseguindo acessar os arquivos dentro desse volume com outro imagem.</li>
+  <li> Ao carregar os arquivos .dcm no modelo, metade deles estava com o dobro da intensidade máxima aguentada pela função de leitura xrv.utils.read_xray_dcm.</li>
+</ol>
 <h2> Aprendizado obtido </h2>
 
 <h2> Primeira parte - Criar e rodar um servidor PACs OrthanC no Docker </h2>
