@@ -1,7 +1,13 @@
 {
+  "Name": "Orthanc",
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "DicomAET": "ORTHANC",
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+  "RestApiWriteToFileSystemEnabled": true,
   "RegisteredUsers": {
-    "matheus": "malia123" 
+    "matheus": "malia123"
   },
-  "AuthenticationEnabled": true, 
+  "AuthenticationEnabled": true,
   "RemoteAccessAllowed": true
 }
