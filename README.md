@@ -57,12 +57,12 @@ docker-compose up -d
 
 <p>Para essa etapa do projeto foi necessário escolher e coletar os <a href="https://drive.google.com/file/d/1Decc3rX_5oxF-4VvQxtWVqkV91O_Auf9/view">dados</a> para que pudessem ser enviados ao servidor.</p>
 <p> Em sequência, foi preciso descobrir como os arquivos são formatados, como o servidor recebe dados e qual era a melhor maneira de enviá-los.</p>
-<p> Assim, cheguei a conclusão.</p>
+<p> Assim, cheguei à conclusão.</p>
 <li> Arquivos DICOM são binários e devem ser lidos como bytes para garantir que sejam enviados corretamente.</li>
 <li> APIs REST, como a do Orthanc, esperam que arquivos sejam transferidos como dados binários em um formulário HTTP.</li>
 <li> Ler como bytes preserva a integridade do arquivo, evitando perdas ou alterações indesejadas.</li>
 
-<p> E, por isso, o código foi estruturado para que fosse possível ler os arquivos direto da pasta zip e enviá-los de forma binária. Esse código em questão foi nomeado como enviar_arquivos.py e, para que funcione corretamente basta executá-lo quando o servidor, ou o contêiner, estiver no ar.</p>
+<p> E, por isso, o código foi estruturado para que fosse possível ler os arquivos direto da pasta zip e enviá-los de forma binária. Esse código em questão foi nomeado como enviar_arquivos.py e, para que funcione corretamente basta executá-lo quando o servidor, ou o contêiner, estiver em operação.</p>
 
 <h2> Terceira parte - Classificar os dados usando um modelo pré-treinado de <i>Machine Learning</i> </h2>
 
@@ -79,6 +79,19 @@ docker build -t teste_xray_imagem .
 docker run -it --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db  teste_xray_imagem
 ```
 <p> Nesse comando se pode observar o volume criado no docker (docker_teste_orthanc_db), sua localização (/var/lib/orthanc/db) e a imagem que estamos executando (teste_xray_imagem).</p> 
+
+<p> Esse comando irá printar um dicionário no terminal, para transformar esse dicionário em arquivo .json, usei o código abaixo, preferi fazer desse jeito manual por ainda não entender completamente como salvar os arquivos da imagem diretamente no desktop local para facilitar o acesso.</p>
+
+```python
+import json
+dict = {dicionario_printado}
+# Nome do arquivo JSON que será salvo
+nome_do_arquivo = "resultados.json"
+
+# Escrevendo os dados no arquivo JSON
+with open(nome_do_arquivo, 'w') as arquivo_json:
+    json.dump(dict, arquivo_json, indent=4)
+```
   
 <p> obs: no código (classificar.py) há uma função para coletar esses arquivos por meio da API rest do servidor que foi o primeiro método que pensei para realizar essa tarefa, mas como era necessário baixar os arquivos novamente, pensei ser melhor encontrar uma forma de usar os arquivos do próprio volume. É por esse motivo que o docker-compose foi atualizado para construir uma mesma network para ambas as imagens, possibilitar a conexão via API.</p>
 
