@@ -25,14 +25,14 @@
   <li> Apesar de ter conseguido usar o volume para persistir os dados, não estava conseguindo acessar os arquivos dentro desse volume com outra imagem.</li>
   <li> Ao carregar os arquivos .dcm no modelo, metade deles estava com o dobro da intensidade máxima suportada pela função de leitura xrv.utils.read_xray_dcm.</li>
   <li> Pouca informação sobre a criação de arquivos DICOM SR.</li>
-  <li> .</li>
-  <li> .</li>
+  <li> Na criação do DICOM SR:</li>
+   <p align=justify> <i>: UserWarning: Invalid value for VR UI: '72682317.56696215.32367375.69516389.09416010'. Please see "https://dicom.nema.org/medical/dicom/current/output/html/part05.html#table_6.2-1" for allowed values for each VR.</i> Não consegui descobrir o que ocasiona esse erro dado que a informação aponta ser devido ao VR UI estar inválido porém, no site indicado há a informação que essa sequÊncia deve ser de apenas números e pontos com até 64 caracteres, o que está sendo obedecido. </p>
 </ol>
 <h2> Conhecimentos adquiridos </h2>
 
 <p align=justify> Com esse projeto, pude aprender a configurar contêiners, imagens e volumes no Docker, bem como entender os benefícios de se utilizar esse <i>software</i>, como:
   <li> Isolar um ambiente virtual com apenas as dependências necessárias e impedir a interferência de outras bibliotecas.</li>
-  <li> Poupar memória do computador usando o armazenamento em nuvem.</li>
+  <li> Poupar armazenamento do computador usando o armazenamento em nuvem.</li>
  <p align=justify> Além disso, também consegui experenciar uma boa maneira de se usar modelos prontos de IA para ajudar no diagnóstico de pacientes por meio de arquivos .dcm; </p>
   
   <p align=justify>Outro ponto importante foi que aprendi como ler esses arquivos .dcm, assim como escrevê-los; </p>
@@ -40,7 +40,7 @@
   <p align=justify>Ademais, pude melhorar meu entendimento sobre servidores e sua comunicação via <i>API rest</i>; </p>
 </p>
 
-<h2> Primeira parte - Criação e execução um servidor PACs OrthanC no Docker </h2>
+<h2> Primeira parte - Criação e execução de um servidor PACs OrthanC no Docker </h2>
 
 <p align=justify> Nesta primeira etapa do projeto, mostrou-se necessário aprender como criar um servidor no Docker e como se dava a sua comunicação com PACs Orthanc. Após algumas pesquisas, consegui descobrir como esses fatos aconteciam e como configurar alguns elementos. O arquivo "orthanc.json" traz a configuração de um usuário qualquer com uma senha e acesso remoto autorizado para o servidor funcionando.</p>
 
@@ -54,7 +54,7 @@
 ```
 docker-compose up -d
 ```
-
+<p align=justify> A instrução acima é composta por 3 partes a primeira "docker-compose" se refere ao método para gerenciar os arquivos docker-compose.yml, a segunda "up" tem como objetivo criar e/ou inicializar o contêiner e a última "-d" é uma <i> flag </i> usada para executar o contêiner em segundo plano. </p>
 <h2> Segunda parte - Adição de arquivos DICOM ao servidor usando Python. </h2>
 
 <p align=justify>Para esta etapa do projeto, foi necessário escolher e coletar os <a href="https://drive.google.com/file/d/1Decc3rX_5oxF-4VvQxtWVqkV91O_Auf9/view">dados</a> que pudessem ser enviados ao servidor.</p>
@@ -75,14 +75,14 @@ docker-compose up -d
 ```
 docker build -t teste_xray_imagem .
 ```
-<p align=justify>Comando para criar a imagem com o nome de "teste_xray_imagem".</p>
+<p align=justify>Comando para criar a imagem, usando "docker build" com o nome de "teste_xray_imagem". A <i>flag</i> "-t" se refere as <i>tags</i> e é usada para nomear imagens, enquanto "docker build" usa as configurações escritas no Dockerfile.</p>
 
 ```
-docker run -it --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db  teste_xray_imagem
+docker run --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db  teste_xray_imagem
 ```
-<p align=justify> Nesse comando se pode observar o volume criado no Docker (docker_teste_orthanc_db), sua localização (/var/lib/orthanc/db) e a imagem que estamos executando (teste_xray_imagem).</p> 
+<p align=justify> Nesse comando se pode observar a criação e inicialização de um conteiner com "docker run", a <i>flags</i> "--rm" e "-v" servindo para remover o contêiner após seu encerramento e especificar o volume criado no Docker (docker_teste_orthanc_db) e sua localização (/var/lib/orthanc/db), respectivamente.</p> 
 
-<p align=justify> Esse comando irá <i>printar</i> um dicionário no terminal, para transformar esse dicionário em arquivo .json, usei o código abaixo. Por preferência, optei por fazer desse jeito manual por ainda não entender completamente como salvar os arquivos da imagem diretamente no <i>desktop</i> local para facilitar o acesso.</p>
+<p align=justify> Ao final, o programa irá <i>printar</i> um dicionário no terminal e, para transformar esse dicionário em arquivo .json, usei o código abaixo. Por preferência, optei por fazer desse jeito manual visto que ainda não entendo completamente como salvar os arquivos da imagem diretamente no <i>desktop</i> local.</p>
 
 ```python
 import json
@@ -99,4 +99,8 @@ with open(nome_do_arquivo, 'w') as arquivo_json:
 
 <h2> Quarta parte - Criação de um arquivo DICOM SR <i> (Structured Report) </i> para cada arquivo DICOM </h2>
 
-<p align=justify> Esta foi a parte mais difícil desse projeto por conta da falta de informação encontrada na internet sobre como criar arquivos DICOM SR. A parte de enviá-los para a devida pasta, que se refere aos respectivos laudos dos pacientes, já foi mais tranquila usando o método de envio pela <i>API rest</i>.</p>
+<p align=justify> Esta foi a parte mais difícil desse projeto por conta da falta de informação encontrada na internet sobre como criar arquivos DICOM SR. A parte de enviá-los para a devida pasta, que se refere aos respectivos laudos dos pacientes, não ocasionou problemas, uma vez que os servidores PACs não organizam seus arquivos pela estrutura hierárquica apresentada em seus nomes, mas sim pelo seus metadado, então bastou usar o método de envio pela <i>API rest</i>.</p>
+
+<p align=justify> Assim, desenvolvi o programa criar_dicomsr.py, que tem por finalidade criar os arquivos SR, salvá-los em uma pasta que nomeei "SR" e, por fim, mandá-los ao servidor Orthanc por meio de sua API. </p>
+
+<p align=justify> Para o bom funcionamento desse código, se deve colocá-lo no diretório que foi salvo o resultados.json, uma vez que é por meio dele que todas as informações necessárias são extraídas e executá-lo enquanto o servidor estiver operando.</p>
