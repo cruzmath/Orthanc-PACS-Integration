@@ -16,15 +16,17 @@ def coletar_dcms_api() -> list[str]:
   # Obter a lista de estudos
   response = requests.get(f'{orthanc_url}/studies', auth=auth)
   studies = response.json()
-  
+
+  # iterando sobre cada estudo
   for study_id in studies:
     response = requests.get(f'{orthanc_url}/studies/{study_id}/series', auth=auth)
     series = response.json()
 
+    # iterando sobre cada série dentro de cada estudo
     for serie in series:
       series_id = serie['ID']
       response = requests.get(f'{orthanc_url}/series/{series_id}/instances', auth=auth)
-      instance_id = response.json()[0]['ID']
+      instance_id = response.json()[0]['ID'] # coletando apenas o ID da instância
 
       # Baixar o arquivo DICOM do Orthanc
       response = requests.get(f'{orthanc_url}/instances/{instance_id}/file', auth=auth)
@@ -49,7 +51,7 @@ def listar_arquivos_dcm(diretorio: str) -> list[str]:
   for root, dirs, files in os.walk(diretorio):
     for file in files:
       todos_caminhos.append(os.path.join(root, file))
-  # Como os arquivos não parecem ter extensão no docker, usei o critério de ter um nome longo
+  # Como os arquivos não aparecem com extensão no docker, usei o critério de ter um nome longo, visto que isso implica um maior caminho o que seria equivalente ao documento.
   min_length = 50
 
   # Filtrar os caminhos com base no comprimento
@@ -70,6 +72,7 @@ for dcm_path in lista_pastas:
     series_id = dicom_data.SeriesInstanceUID
     image_id = dicom_data.SOPInstanceUID
 
+    # montando um caminho com as informações acima para salvar nos resultados como um identificador
     caminho = fr"{patient_id}\Study_{study_id}\Series_{series_id}\image-{image_id}"
     
     # Extrair a imagem como um array numpy
@@ -91,7 +94,7 @@ for dcm_path in lista_pastas:
     
     # Se a imagem tiver apenas 2 dimensões (escala de cinza), adicione a dimensão do canal
     if len(dcm_image.shape) == 2:
-        dcm_image = dcm_image[None, :, :]  # Adiciona uma dimensão de canal
+        dcm_image = dcm_image[None, :, :] 
     
     # Aplicar transformações
     transform = torchvision.transforms.Compose([
@@ -115,11 +118,12 @@ for dcm_path in lista_pastas:
     
     # Converter os resultados em um dicionário com as patologias e suas respectivas probabilidades
     resultados = dict(zip(model.pathologies, outputs[0].detach().numpy()))
-    
+
+    # adicionando o identificador de cada resultado
     dict_resultados[caminho] = resultados
 
   except Exception as e:
     print(f"Erro ao processar {dcm_path}: {e}")
 
 # Exibir os resultados
-  print(dict_resultados)
+print(dict_resultados)
