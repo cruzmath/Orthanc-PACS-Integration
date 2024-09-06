@@ -1,7 +1,7 @@
 <h1> Orthanc-PACS-Integration </h1>
 
 <h2> Tecnologias utilizadas </h2>
-<ol>
+<ul>
   <li> Docker.</li>
   <li> Bibliotecas Python:</li> 
   <ul> 
@@ -15,7 +15,7 @@
     <li> re &#8594; Extrair informações de <i>strings</i> de maneira mais descomplicada.</li>
     <li> datetime &#8594; Mostrar informações sobre o dia e hora atuais para colocar no DICOM SR.</li>
   </ul>
-</ol> 
+</ul> 
 
 <h2> ⚠️Problemas encontrados </h2>
 <ol> 
@@ -55,14 +55,17 @@
 docker-compose up -d
 ```
 <p align=justify> A instrução acima é composta por 3 partes a primeira "docker-compose" se refere ao método para gerenciar os arquivos docker-compose.yml, a segunda "up" tem como objetivo criar e/ou inicializar o contêiner e a última "-d" é uma <i> flag </i> usada para executar o contêiner em segundo plano. </p>
+
+<p align=justify> Obs: Uma <i> flag </i> é um parâmetro utilizado para ativar ou desabilitar funções ou comportamentos do código.</p>
+
 <h2> Segunda parte - Adição de arquivos DICOM ao servidor usando Python. </h2>
 
 <p align=justify>Para esta etapa do projeto, foi necessário escolher e coletar os <a href="https://drive.google.com/file/d/1Decc3rX_5oxF-4VvQxtWVqkV91O_Auf9/view">dados</a> que pudessem ser enviados ao servidor.</p>
 <p align=justify> Em sequência, foi preciso descobrir como os arquivos são formatados, como o servidor recebe dados e qual era a melhor maneira de enviá-los.</p>
 <p align=justify> Assim, cheguei às conclusões.</p>
-<li> Arquivos DICOM são binários e devem ser lidos como <i>bytes</i> para garantir que sejam enviados corretamente.</li>
+<li> Arquivos DICOM são binários e devem ser lidos como <i>bytes</i> (sequências de 0s e 1s) para garantir que sejam enviados corretamente.</li>
 <li> <i>APIs rest</i>, como a do Orthanc, esperam que arquivos sejam transferidos como dados binários em um formulário HTTP.</li>
-<li> Ler como <i>bytes</i> preserva a integridade do arquivo, evitando perdas e/ou alterações indesejadas.</li>
+<li> Ler como <i>bytes</i> preserva a integridade do arquivo ao garantir que nenhuma modificação seja feita durante a leitura, o que é especialmente importante para arquivos binários como DICOM.</li>
 
 <p align=justify> E, por isso, o código foi estruturado para que fosse possível ler os arquivos direto da pasta <i>zip</i> e enviá-los de forma binária. Ele foi nomeado como enviar_arquivos.py e, para que funcione corretamente, basta executá-lo quando o servidor, ou o contêiner, estiver em operação.</p>
 
@@ -75,7 +78,7 @@ docker-compose up -d
 ```
 docker build -t teste_xray_imagem .
 ```
-<p align=justify>Comando para criar a imagem, usando "docker build" com o nome de "teste_xray_imagem". A <i>flag</i> "-t" se refere as <i>tags</i> e é usada para nomear imagens, enquanto "docker build" usa as configurações escritas no Dockerfile.</p>
+<p align=justify>Comando para criar a imagem, usando "docker build" com o nome de "teste_xray_imagem". A <i>flag</i> "-t" se refere as <i>tags</i> (rótulos) e é usada para nomear imagens, enquanto "docker build" usa as configurações escritas no Dockerfile.</p>
 
 ```
 docker run --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db  teste_xray_imagem
@@ -90,7 +93,7 @@ dict = {dicionario_printado}
 # Nome do arquivo JSON que será salvo
 nome_do_arquivo = "resultados.json"
 
-# Escrevendo os dados no arquivo JSON
+# Gravando os dados no arquivo JSON, utilizando a função json.dump para salvar o dicionário no formato correto.
 with open(nome_do_arquivo, 'w') as arquivo_json:
     json.dump(dict, arquivo_json, indent=4)
 ```
@@ -103,4 +106,4 @@ with open(nome_do_arquivo, 'w') as arquivo_json:
 
 <p align=justify> Assim, desenvolvi o programa criar_dicomsr.py, que tem por finalidade criar os arquivos SR com todos os atributos essenciais, salvá-los em uma pasta que nomeei "SR" (também fiz o <i>upload</i> dessa pasta nesse repositório, caso seja de interesse verificá-la) e, por fim, mandá-los ao servidor Orthanc por meio de sua API. </p>
 
-<p align=justify> Para o bom funcionamento desse código, se deve colocá-lo no diretório que foi salvo o resultados.json, uma vez que é por meio dele que todas as informações precisas são extraídas e executá-lo enquanto o servidor estiver operando.</p>
+<p align=justify> Para que o código funcione corretamente, coloque-o no diretório onde o arquivo resultados.json foi salvo. Esse arquivo contém todas as informações necessárias, e o script deve ser executado enquanto o servidor estiver em operação.</p>
