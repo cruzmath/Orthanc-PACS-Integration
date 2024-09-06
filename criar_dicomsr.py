@@ -41,7 +41,7 @@ def create_dicom_sr(json_results_path:str)-> None:
             ds.PatientID = patient_id
             ds.StudyInstanceUID = study_instance_uid
             ds.SeriesInstanceUID = series_instance_uid
-            ds.SOPInstanceUID = image_instance_uid
+            ds.SOPInstanceUID = = generate_uid()  # Gerar um novo UID para o SR para evitar conflitos
 
             # Set SR-specific attributes
             ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
