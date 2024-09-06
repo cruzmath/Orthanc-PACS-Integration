@@ -99,8 +99,8 @@ with open(nome_do_arquivo, 'w') as arquivo_json:
 
 <h2> Quarta parte - Criação de um arquivo DICOM SR <i> (Structured Report) </i> para cada arquivo DICOM </h2>
 
-<p align=justify> Esta foi a parte mais difícil desse projeto por conta da falta de informação encontrada na internet sobre como criar arquivos DICOM SR. A parte de enviá-los para a devida pasta, que se refere aos respectivos laudos dos pacientes, não ocasionou problemas, uma vez que os servidores PACs não organizam seus arquivos pela estrutura hierárquica apresentada em seus nomes, mas sim pelo seus metadado, então bastou usar o método de envio pela <i>API rest</i>.</p>
+<p align=justify> Esta foi a parte mais difícil desse projeto por conta da falta de informação encontrada na internet sobre como criar arquivos DICOM SR. A parte de enviá-los para a devida pasta, que se refere aos respectivos laudos dos pacientes, não ocasionou problemas, uma vez que os servidores PACs não organizam seus arquivos pela estrutura hierárquica apresentada em seus nomes, mas sim pelo seus metadados, então bastou criar os documentos corretamente e enviá-los pela <i>API rest</i>.</p>
 
-<p align=justify> Assim, desenvolvi o programa criar_dicomsr.py, que tem por finalidade criar os arquivos SR, salvá-los em uma pasta que nomeei "SR" (também fiz o <i>upload</i> dessa pasta nesse repositório, caso seja de interesse verificá-la) e, por fim, mandá-los ao servidor Orthanc por meio de sua API. </p>
+<p align=justify> Assim, desenvolvi o programa criar_dicomsr.py, que tem por finalidade criar os arquivos SR com todos os atributos essenciais, salvá-los em uma pasta que nomeei "SR" (também fiz o <i>upload</i> dessa pasta nesse repositório, caso seja de interesse verificá-la) e, por fim, mandá-los ao servidor Orthanc por meio de sua API. </p>
 
-<p align=justify> Para o bom funcionamento desse código, se deve colocá-lo no diretório que foi salvo o resultados.json, uma vez que é por meio dele que todas as informações necessárias são extraídas e executá-lo enquanto o servidor estiver operando.</p>
+<p align=justify> Para o bom funcionamento desse código, se deve colocá-lo no diretório que foi salvo o resultados.json, uma vez que é por meio dele que todas as informações precisas são extraídas e executá-lo enquanto o servidor estiver operando.</p>
