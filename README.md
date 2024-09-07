@@ -23,11 +23,23 @@
   <li> Meu <i>desktop</i> pessoal está no limite das configurações necessárias para executar o Docker, então foi complicado conseguir encontrar uma versão que funcionava.</li>
   <li> O <i>upload</i> dos arquivos ao servidor não estava sendo persistido para outra inicialização.</li>
   <li> Apesar de ter conseguido usar o volume para persistir os dados, não estava conseguindo acessar os arquivos dentro desse volume com outra imagem.</li>
-  <li> Ao carregar os arquivos .dcm no modelo, metade deles estava com o dobro da intensidade máxima suportada pela função de leitura xrv.utils.read_xray_dcm.</li>
+  <li> Ao carregar os arquivos .dcm no modelo, metade deles estava com o dobro da intensidade máxima suportada pela função de leitura <i>xrv.utils.read_xray_dcm</i>.</li>
   <li> Pouca informação sobre a criação de arquivos DICOM SR.</li>
   <li> Na criação do DICOM SR:</li>
-   <p align=justify> <i>: UserWarning: Invalid value for VR UI: '72682317.56696215.32367375.69516389.09416010'. Please see "https://dicom.nema.org/medical/dicom/current/output/html/part05.html#table_6.2-1" for allowed values for each VR.</i> Não consegui descobrir o que ocasiona esse erro dado que a informação aponta ser devido ao VR UI estar inválido porém, no site indicado há a informação que essa sequÊncia deve ser de apenas números e pontos com até 64 caracteres, o que está sendo obedecido. </p>
+   <p align=justify> <i>: UserWarning: Invalid value for VR UI: '72682317.56696215.32367375.69516389.09416010'. Please see "https://dicom.nema.org/medical/dicom/current/output/html/part05.html#table_6.2-1" for allowed values for each VR.</i> </p>
 </ol>
+
+<h2> 🔧Soluções aos Problemas </h2>
+<ol> 
+  <li> Criei uma imagem no Docker com as dependências necessárias e executava meu script por meio dela.</li>
+  <li> Nesse <a href="https://docs.docker.com/desktop/install/windows-install/">site</a> há uma versão que se mostrou compatível e estável para a utilização mesmo em baixas configurações.</li>
+  <li> Como solução, foi necessário definir o volume com o mesmo caminho estabelicido para o <i>StorageDirectory</i> no arquivo orthanc.json.</li>
+  <li> Bastou designar o caminho para o volume na descrição da imagem feita no docker-compose e, então, chamá-lo na linha de comando mostrada na terceira parte.</li>
+  <li> Para esse problema, tive que usar a biblioteca base do <i>torchxrayvision</i> e criar uma função de leitura usando <i>pydicom</i> que diminua a quantidade máxima de pixels para se adequar ao modelo utilizado pela <i>torchxrayvision</i>.</li>
+  <li>Não houve solução definitiva, apenas ampliação das pesquisas e consulta de diferentes IAs.</li>
+   <li>Não consegui descobrir a causa exata do erro relacionado ao VR UI. A informação aponta que o VR UI deve ser apenas números e pontos com até 64 caracteres, e o que estou usando parece obedecer à essa regra.</li>
+</ol>
+
 <h2> Conhecimentos adquiridos </h2>
 
 <p align=justify> Com esse projeto, pude aprender a configurar contêiners, imagens e volumes no Docker, bem como entender os benefícios de se utilizar esse <i>software</i>, como:
