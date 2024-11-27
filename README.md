@@ -1,121 +1,126 @@
-<h1> Orthanc-PACS-Integration </h1>
+# Orthanc-PACS-Integration
 
-<h2> Tecnologias utilizadas </h2>
-<ul>
-  <li> Docker.</li>
-  <li> Bibliotecas Python:</li> 
-  <ul> 
-    <li> requests &#8594; Fazer a comunicação com o servidor por meio de solicitações HTTP.</li> 
-    <li> zipfile &#8594; Ler arquivos <i>zip</i> sem precisar extraí-los.</li>
-    <li> io &#8594; Ler os arquivos DICOM como <i>bytes</i>.</li>
-    <li> torchxrayvision &#8594; Possibilitar a utilização de modelos pré-treinados de <i> Machine Learning</i>.</li>
-    <li> pydicom &#8594; Realizar a leitura e escrita de arquivos DICOM.</li>
-    <li> pathlib &#8594; Possibilitar a criação e a leitura de frases como caminhos no diretório.</li>
-    <li> json &#8594; Criar e ler arquivos .json.</li>
-    <li> re &#8594; Extrair informações de <i>strings</i> de maneira mais descomplicada.</li>
-    <li> datetime &#8594; Mostrar informações sobre o dia e hora atuais para colocar no DICOM SR.</li>
-  </ul>
-</ul> 
+## Table of Contents
+1. [Technologies Used](#technologies-used)
+2. [Issues Encountered](#issues-encountered)
+3. [Solutions to Issues](#solutions-to-issues)
+4. [Knowledge Acquired](#knowledge-acquired)
+5. [Project Phases](#project-phases)
+   - [Phase 1: Creating and Running an Orthanc PACS Server on Docker](#phase-1-creating-and-running-an-orthanc-pacs-server-on-docker)
+   - [Phase 2: Adding DICOM Files to the Server Using Python](#phase-2-adding-dicom-files-to-the-server-using-python)
+   - [Phase 3: Data Classification Using a Pre-Trained Machine Learning Model](#phase-3-data-classification-using-a-pre-trained-machine-learning-model)
+   - [Phase 4: Creating a DICOM SR (Structured Report) File](#phase-4-creating-a-dicom-sr-structured-report-file)
 
-<h2> ⚠️Problemas encontrados </h2>
-<ol> 
-  <li> A biblioteca <i>Torch</i> não estava sendo lida no meu <i>desktop</i>.</li>
-  <li> Meu <i>desktop</i> pessoal está no limite das configurações necessárias para executar o Docker, então foi complicado conseguir encontrar uma versão que funcionava.</li>
-  <li> O <i>upload</i> dos arquivos ao servidor não estava sendo persistido para outra inicialização.</li>
-  <li> Apesar de ter conseguido usar o volume para persistir os dados, não estava conseguindo acessar os arquivos dentro desse volume com outra imagem.</li>
-  <li> Ao carregar os arquivos .dcm no modelo, metade deles estava com o dobro da intensidade máxima suportada pela função de leitura <i>xrv.utils.read_xray_dcm</i>.</li>
-  <li> Pouca informação sobre a criação de arquivos DICOM SR.</li>
-  <li> Na criação do DICOM SR:</li>
-   <p align=justify> <i>: UserWarning: Invalid value for VR UI: '72682317.56696215.32367375.69516389.09416010'. Please see "https://dicom.nema.org/medical/dicom/current/output/html/part05.html#table_6.2-1" for allowed values for each VR.</i> </p>
-</ol>
+---
 
-<h2> 🔧Soluções aos Problemas </h2>
-<ol> 
-  <li> Criei uma imagem no Docker com as dependências necessárias e executava meu script por meio dela.</li>
-  <li> Nesse <a href="https://docs.docker.com/desktop/install/windows-install/">site</a> há uma versão que se mostrou compatível e estável para a utilização mesmo em baixas configurações.</li>
-  <li> Como solução, foi necessário definir o volume com o mesmo caminho estabelicido para o <i>StorageDirectory</i> no arquivo orthanc.json.</li>
-  <li> Bastou designar o caminho para o volume na descrição da imagem feita no docker-compose e, então, chamá-lo na linha de comando mostrada na terceira parte.</li>
-  <li> Para esse problema, tive que usar a biblioteca base do <i>torchxrayvision</i> e criar uma função de leitura usando <i>pydicom</i> que diminua a quantidade máxima de pixels para se adequar ao modelo utilizado pela <i>torchxrayvision</i>.</li>
-  <li>Não houve solução definitiva, apenas ampliação das pesquisas e consulta de diferentes IAs.</li>
-   <li>Não consegui descobrir a causa exata do erro relacionado ao VR UI. A informação aponta que o VR UI deve ser apenas números e pontos com até 64 caracteres, e o que estou usando parece obedecer à essa regra.</li>
-</ol>
+## Technologies Used
 
-<h2> Conhecimentos adquiridos </h2>
+- **Docker**
+- **Python Libraries**:
+  - `requests` → Handles HTTP communication with the server.
+  - `zipfile` → Reads ZIP files without extraction.
+  - `io` → Reads DICOM files as bytes.
+  - `torchxrayvision` → Provides pre-trained machine learning models.
+  - `pydicom` → Reads and writes DICOM files.
+  - `pathlib` → Enables handling file paths easily.
+  - `json` → Creates and reads JSON files.
+  - `re` → Simplifies string extraction.
+  - `datetime` → Provides current date and time for DICOM SR metadata.
 
-<p align=justify> Com esse projeto, pude aprender a configurar contêiners, imagens e volumes no Docker, bem como entender os benefícios de se utilizar esse <i>software</i>, como:
-  <li> Isolar um ambiente virtual com apenas as dependências necessárias e impedir a interferência de outras bibliotecas.</li>
-  <li> Poupar armazenamento do computador usando o armazenamento em nuvem.</li>
- <p align=justify> Além disso, também consegui experenciar uma boa maneira de se usar modelos prontos de IA para ajudar no diagnóstico de pacientes por meio de arquivos .dcm; </p>
-  
-  <p align=justify>Outro ponto importante foi que aprendi como ler esses arquivos .dcm, assim como escrevê-los; </p>
-  
-  <p align=justify>Ademais, pude melhorar meu entendimento sobre servidores e sua comunicação via <i>API rest</i>; </p>
-</p>
+---
 
-<h2> Primeira parte - Criação e execução de um servidor PACs OrthanC no Docker </h2>
+## Issues Encountered
 
-<p align=justify> Nesta primeira etapa do projeto, mostrou-se necessário aprender como criar um servidor no Docker e como se dava a sua comunicação com PACs Orthanc. Após algumas pesquisas, consegui descobrir como esses fatos aconteciam e como configurar alguns elementos. O arquivo "orthanc.json" traz a configuração de um usuário qualquer com uma senha e acesso remoto autorizado para o servidor funcionando.</p>
+1. File uploads to the server weren't persistent across restarts.
+2. Although data persistence was achieved using a Docker volume, accessing files within the volume from another image was problematic.
+3. Some `.dcm` files had double the maximum intensity supported by the `xrv.utils.read_xray_dcm` function.
+4. Limited information available on creating DICOM SR files.
+5. While creating the DICOM SR, the following error appeared:
+> UserWarning: Invalid value for VR UI: '72682317.56696215.32367375.69516389.09416010'. Please see "https://dicom.nema.org/medical/dicom/current/output/html/part05.html#table_6.2-1" for allowed values for each VR.
 
-<p align=justify> Para o bom funcionamento do servidor, é necessário seguir os seguintes passos:</p>
-<li> Baixar o Docker e seguir todos o algoritmo de sua instalação;</li>
 
-<li> Criar um arquivo docker-compose.yml e um orthanc.json em um único diretório de sua escolha para configurar o servidor e usuários, se necessário, respectivamente;</li>
+---
 
-<li> No terminal de comando do seu <i>desktop</i>, escrever a linha de código abaixo:</li>
+## Solutions to Issues
 
-```
+1. Configured the volume to use the same path as the `StorageDirectory` defined in the `orthanc.json` file.
+2. Specified the volume path in the Docker Compose file to allow shared access.
+3. Used `pydicom` to preprocess the DICOM files and adjust pixel intensity before passing them to `torchxrayvision`.
+4. Although no definitive solution for DICOM SR creation issues was found, research and experimentation with different tools helped clarify some aspects.
+5. The exact cause of the VR UI error remains unknown. The issue might relate to the DICOM standard's strict rules, though the provided value appears to conform.
+
+---
+
+## Knowledge Acquired
+
+Through this project, I gained:
+- Practical experience in configuring Docker containers, images, and volumes, appreciating its benefits:
+- Isolating virtual environments with required dependencies.
+- Reducing local storage requirements by leveraging cloud storage.
+- Hands-on understanding of applying pre-trained AI models for patient diagnostics using `.dcm` files.
+- Knowledge of reading and writing `.dcm` files programmatically.
+- Insights into server operations and REST API communication.
+
+---
+
+## Project Phases
+
+### Phase 1: Creating and Running an Orthanc PACS Server on Docker
+
+This phase involved setting up a Dockerized PACS server. Using an `orthanc.json` file, user accounts with remote access were configured. 
+
+Steps:
+1. Install Docker and follow the installation guide.
+2. Create `docker-compose.yml` and `orthanc.json` files in the same directory.
+3. Run the following command in the terminal:
+```bash
 docker-compose up -d
 ```
-<p align=justify> A instrução acima é composta por 3 partes a primeira "docker-compose" se refere ao método para gerenciar os arquivos docker-compose.yml, a segunda "up" tem como objetivo criar e/ou inicializar o contêiner e a última "-d" é uma <i> flag </i> usada para executar o contêiner em segundo plano. </p>
+In which: 
+* docker-compose manages the .yml file.
+* up initializes the container.
+* -d runs the container in detached mode.
 
-<p align=justify> Obs: Uma <i> flag </i> é um parâmetro utilizado para ativar ou desabilitar funções ou comportamentos do código.</p>
+### Phase 2: Adding DICOM Files to the Server Using Python
+DICOM files were uploaded to the Orthanc server using a Python script (enviar_arquivos.py). These files were:
 
-<h2> Segunda parte - Adição de arquivos DICOM ao servidor usando Python. </h2>
+* Read as binary data to preserve integrity.
+* Sent to the server via HTTP using the Orthanc REST API.
+How to execute:
 
-<p align=justify>Para esta etapa do projeto, foi necessário escolher e coletar os <a href="https://drive.google.com/file/d/1Decc3rX_5oxF-4VvQxtWVqkV91O_Auf9/view">dados</a> que pudessem ser enviados ao servidor.</p>
-<p align=justify> Em sequência, foi preciso descobrir como os arquivos são formatados, como o servidor recebe dados e qual era a melhor maneira de enviá-los.</p>
-<p align=justify> Assim, cheguei às conclusões.</p>
-<li> Arquivos DICOM são binários e devem ser lidos como <i>bytes</i> (sequências de 0s e 1s) para garantir que sejam enviados corretamente.</li>
-<li> <i>APIs rest</i>, como a do Orthanc, esperam que arquivos sejam transferidos como dados binários em um formulário HTTP.</li>
-<li> Ler como <i>bytes</i> preserva a integridade do arquivo ao garantir que nenhuma modificação seja feita durante a leitura, o que é especialmente importante para arquivos binários como DICOM.</li>
+1. Place the .zip files in the designated folder.
+2. Run the script while the server is operational.
 
-<p align=justify> E, por isso, o código foi estruturado para que fosse possível ler os arquivos direto da pasta <i>zip</i> e enviá-los de forma binária. Ele foi nomeado como enviar_arquivos.py e, para que funcione corretamente, basta executá-lo quando o servidor, ou o contêiner, estiver em operação.</p>
+### Phase 3: Data Classification Using a Pre-Trained Machine Learning Model
+A script (classificar.py) was developed to classify the data:
 
-<h2> Terceira parte - Classificação dos dados usando um modelo pré-treinado de <i>Machine Learning</i> </h2>
+Extract files from the Docker volume.
+Read and preprocess the .dcm files.
+Use the densenet121-res224-all model to diagnose and output results in a JSON format.
+Execution Steps:
 
-<p align=justify> Para esta etapa, desenvolvi o código chamado de classificar.py. Esse programa coleta os arquivos do volume Docker, os lê como .dcm e usa o modelo "densenet121-res224-all" para diagnosticar o paciente e, então, montar um .json com o resultado obtido. Assim, observe que o arquivo docker-compose possui uma configuração de volume para a imagem a ser criada a seguir, usando o volume da imagem do servidor, tornando possível a utilização dessa memória.</p>
-
-<p align=justify> Para que esse script funcione corretamente é necessário criar um arquivo Dockerfile com as bibliotecas e os arquivos necessários por ele. Além disso, é preciso criar uma imagem no Docker usando esse arquivo e depois executá-la com os seguintes comandos:</p>
-
-```
+Create a Dockerfile specifying dependencies.
+Build an image using:
+```bash
 docker build -t teste_xray_imagem .
 ```
-<p align=justify>Comando para criar a imagem, usando "docker build" com o nome de "teste_xray_imagem". A <i>flag</i> "-t" se refere as <i>tags</i> (rótulos) e é usada para nomear imagens, enquanto "docker build" usa as configurações escritas no Dockerfile.</p>
+-t: name the image with the following text.
 
+Run the container with:
+```bash
+docker run --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db teste_xray_imagem
 ```
-docker run --rm -v docker_teste_orthanc_db:/var/lib/orthanc/db  teste_xray_imagem
-```
-<p align=justify> Nesse comando se pode observar a criação e inicialização de um conteiner com "docker run", a <i>flags</i> "--rm" e "-v" servindo para remover o contêiner após seu encerramento e especificar o volume criado no Docker (docker_teste_orthanc_db) e sua localização (/var/lib/orthanc/db), respectivamente.</p> 
+--rm: Removes the container after execution.
+-v: Maps the volume to share data between containers.
 
-<p align=justify> Ao final, o programa irá <i>printar</i> um dicionário no terminal e, para transformar esse dicionário em arquivo .json, usei o código abaixo. Por preferência, optei por fazer desse jeito manual visto que ainda não entendo completamente como salvar os arquivos da imagem diretamente no <i>desktop</i> local.</p>
+### Phase 4: Creating a DICOM SR (Structured Report) File
+The criar_dicomsr.py script generates DICOM SR files:
 
-```python
-import json
-dict = {dicionario_printado}
-# Nome do arquivo JSON que será salvo
-nome_do_arquivo = "resultados.json"
+* Reads results from resultados.json.
+* Saves SR files to a local SR folder.
+* Uploads them to the Orthanc server via its REST API.
+How to execute:
 
-# Gravando os dados no arquivo JSON, utilizando a função json.dump para salvar o dicionário no formato correto.
-with open(nome_do_arquivo, 'w') as arquivo_json:
-    json.dump(dict, arquivo_json, indent=4)
-```
-  
-<p align=justify> Obs: no código (classificar.py) há uma função para coletar esses arquivos por meio da <i>API rest</i> do servidor que foi o primeiro método que pensei para realizar essa tarefa, mas como era necessário baixar os arquivos novamente, acreditei ser mais conveniente encontrar uma forma de usar os arquivos do próprio volume. É por esse motivo que o docker-compose foi atualizado para construir uma <i>network</i> para ambas as imagens.</p>
-
-<h2> Quarta parte - Criação de um arquivo DICOM SR <i> (Structured Report) </i> para cada arquivo DICOM </h2>
-
-<p align=justify> Esta foi a parte mais difícil desse projeto por conta da falta de informação encontrada na internet sobre como criar arquivos DICOM SR. A parte de enviá-los para a devida pasta, que se refere aos respectivos laudos dos pacientes, não ocasionou problemas, uma vez que os servidores PACs não organizam seus arquivos pela estrutura hierárquica apresentada em seus nomes, mas sim pelo seus metadados, então bastou criar os documentos corretamente e enviá-los pela <i>API rest</i>.</p>
-
-<p align=justify> Assim, desenvolvi o programa criar_dicomsr.py, que tem por finalidade criar os arquivos SR com todos os atributos essenciais, salvá-los em uma pasta que nomeei "SR" (também fiz o <i>upload</i> dessa pasta nesse repositório, caso seja de interesse verificá-la) e, por fim, mandá-los ao servidor Orthanc por meio de sua API. </p>
-
-<p align=justify> Para que o código funcione corretamente, coloque-o no diretório onde o arquivo resultados.json foi salvo. Esse arquivo contém todas as informações necessárias, e o script deve ser executado enquanto o servidor estiver em operação.</p>
+* Place the script in the directory containing resultados.json.
+* Run the script while the server is active.
+> Note: The Orthanc server organizes files based on metadata, not folder structure. Ensure proper file metadata for correct categorization.
